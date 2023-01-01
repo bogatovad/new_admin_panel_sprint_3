@@ -1,0 +1,3 @@
+.mypy_cache
+etl/.env
+etl/.env_elastic
