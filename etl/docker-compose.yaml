@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  etl:
+    build:
+      context: .
+    command: python3 main.py
+    depends_on:
+      - "postgres"
+      - "elasticsearch"
+
+  postgres:
+    image: postgres:13.0-alpine
+    volumes:
+      - data_postgres:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    env_file:
+      - ./.env
+
+  elasticsearch:
+    image: elasticsearch:8.5.3
+    volumes:
+      - data_elasticsearch:/usr/share/elasticsearch/data
+    expose:
+      - 9200
+    env_file:
+      - .env_elastic
+
+volumes:
+  data_postgres:
+  data_elasticsearch:
