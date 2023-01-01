@@ -2,3 +2,4 @@
 etl/.env
 etl/.env_elastic
 .idea
+__pycache__
