@@ -1,10 +1,9 @@
 import logging
-from contextlib import contextmanager
 
+import backoff
+from elastic_transport import ConnectionError
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
-
-from utils import backoff
 
 
 class PostgresExtract:
@@ -21,7 +20,11 @@ class PostgresExtract:
         logging.info('Cursor is close')
 
     @staticmethod
-    @backoff()
+    @backoff.on_exception(
+        backoff.expo,
+        ConnectionError,
+        max_tries=10,
+    )
     def extract_data(query: str, curs: DictCursor) -> list:
         curs.execute(query)
         data = curs.fetchall()
@@ -74,7 +77,6 @@ class PostgresExtract:
             'film_work': lambda _ids: ids,
         }[table](ids)
 
-    # todo: вот тут надо собрать данные.
     def get_all_data_film_work(self, ids_film_work: list[str]):
         """Получить всю информацию о фильме."""
         ids = str(ids_film_work)[1:-1]

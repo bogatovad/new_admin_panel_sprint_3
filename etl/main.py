@@ -1,15 +1,15 @@
-from psycopg2.extras import DictCursor
-import psycopg2
 import logging
 import time
+
+import psycopg2
+from dotenv import dotenv_values
+from psycopg2.extras import DictCursor
 
 from config import dsl
 from load_to_elastic import LoadElastic
 from postgres_extract import PostgresExtract
 from schemas import ElasticSettings, FilmworkSchemaOut
 from state import JsonFileStorage, State
-from utils import TransferDataError
-from dotenv import dotenv_values
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(message)s")
@@ -44,16 +44,14 @@ def main():
                             table, ids_modified)
                         data = postgres_extract.get_all_data_film_work(
                             ids_film_work)
-                        film_works_to_elastic = [FilmworkSchemaOut(**item) for item in data]
+                        film_works_to_elastic = [
+                            FilmworkSchemaOut(**item) for item in data]
                         elastic_database.send_data_to_es(
                             elastic_database.es, film_works_to_elastic)
                         state.set_state(key_state, last_modified.isoformat())
 
         except psycopg2.OperationalError:
             logging.error('Connection refused')
-
-        except TransferDataError:
-            logging.error('Error while sending data to elasticsearch')
 
         time.sleep(int(config.get('SLEEP')))
 

@@ -1,10 +1,11 @@
 import logging
 
+import backoff
 from dotenv import dotenv_values
+from elastic_transport import ConnectionError
 from elasticsearch import Elasticsearch, helpers
 
 from schemas import FilmworkSchemaOut
-from utils import backoff
 
 config = dotenv_values(".env")
 
@@ -19,7 +20,11 @@ class LoadElastic:
         )
 
     @staticmethod
-    @backoff()
+    @backoff.on_exception(
+        backoff.expo,
+        ConnectionError,
+        max_tries=10,
+    )
     def send_data_to_es(es: Elasticsearch, es_data: list[FilmworkSchemaOut]) -> tuple[int, list]:
         query = [{'_index': 'movies', '_id': data.id, '_source': data.dict()}
                  for data in es_data]
