@@ -1,4 +1,5 @@
 import logging
+from contextlib import contextmanager
 
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
@@ -15,6 +16,10 @@ class PostgresExtract:
         self.pg_conn = pg_conn
         self.curs = pg_conn.cursor()
 
+    def __del__(self):
+        self.curs.close()
+        logging.info('Cursor is close')
+
     @staticmethod
     @backoff()
     def extract_data(query: str, curs: DictCursor) -> list:
@@ -29,7 +34,7 @@ class PostgresExtract:
             f"FROM content.{table} "
             f"WHERE modified > '{modified}' "
             "ORDER BY modified "
-            f'LIMIT {self.LIMIT} OFFSET {offset}'
+            f"LIMIT {self.LIMIT} OFFSET {offset}"
         )
         logging.info(f'{modified=}-{table=}')
         data = self.extract_data(query, self.curs)
@@ -69,27 +74,30 @@ class PostgresExtract:
             'film_work': lambda _ids: ids,
         }[table](ids)
 
+    # todo: вот тут надо собрать данные.
     def get_all_data_film_work(self, ids_film_work: list[str]):
         """Получить всю информацию о фильме."""
         ids = str(ids_film_work)[1:-1]
-        query: str = (
-            "SELECT "
-            "fw.id as fw_id, "
-            "fw.title, "
-            "fw.description, "
-            "fw.rating, "
-            "fw.type, "
-            "fw.created, "
-            "fw.modified, "
-            "pfw.role, "
-            "p.id as person_id, "
-            "p.full_name, "
-            "g.name as genre_name "
-            "FROM content.film_work fw "
-            "LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id "
-            "LEFT JOIN content.person p ON p.id = pfw.person_id "
-            "LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id "
-            "LEFT JOIN content.genre g ON g.id = gfw.genre_id "
-            f"WHERE fw.id IN ({ids}); "
-        )
+        query = (f"""
+        SELECT fw.id AS id,
+            fw.rating AS imdb_rating,
+            fw.title,
+            fw.description,
+            fw.created,
+            fw.modified,
+            array_agg(DISTINCT g.name) AS genre,
+            array_agg(DISTINCT p.full_name) FILTER (WHERE pfw.role = 'actor') AS actors_names,
+            array_agg(DISTINCT p.full_name) FILTER (WHERE pfw.role = 'writer') AS writers_names,
+            array_agg(DISTINCT p.full_name) FILTER (WHERE pfw.role = 'director') AS director,
+            COALESCE(json_agg(DISTINCT jsonb_build_object('id', p.id, 'name', p.full_name)) FILTER (WHERE pfw.role = 'actor'),'[]') AS actors,
+            COALESCE(json_agg(DISTINCT jsonb_build_object('id', p.id, 'name', p.full_name)) FILTER (WHERE pfw.role = 'writer'), '[]') AS writers
+            FROM content.film_work fw
+            LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id
+            LEFT JOIN content.person p ON p.id = pfw.person_id
+            LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id
+            LEFT JOIN content.genre g ON g.id = gfw.genre_id
+            WHERE fw.id IN ({ids})
+            GROUP BY fw.id
+            ORDER BY fw.modified;
+        """)
         return self.extract_data(query, self.curs)

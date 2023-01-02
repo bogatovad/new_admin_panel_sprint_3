@@ -1,21 +1,6 @@
-from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, BaseSettings, Field
-
-
-class FilmworkSchemaIn(BaseModel):
-    fw_id: str
-    title: str
-    description: Optional[str]
-    rating: Optional[float]
-    type: str
-    created: datetime
-    modified: datetime
-    role: Optional[str]
-    person_id: Optional[str]
-    full_name: Optional[str]
-    genre_name: str
+from pydantic import BaseModel, BaseSettings, Field, validator
 
 
 class PersonSchema(BaseModel):
@@ -29,11 +14,15 @@ class FilmworkSchemaOut(BaseModel):
     genre: list[str]
     title: str
     description: Optional[str]
-    director: list[str]
-    actors_names: list[str]
-    writers_names: list[str]
-    actors: list[PersonSchema]
-    writers: list[PersonSchema]
+    director: Optional[list[str]]
+    actors_names: Optional[list[str]]
+    writers_names: Optional[list[str]]
+    actors: Optional[list[PersonSchema]]
+    writers: Optional[list[PersonSchema]]
+
+    @validator('director')
+    def validate_director(cls, value):
+        return [] if value is None else value
 
 
 class ElasticSettings(BaseSettings):
