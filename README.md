@@ -22,3 +22,8 @@ docker exec -it etl_postgres_1 psql -h <HOST> -d <NAME> -U <USER>
 ``` bash
 docker exec -it etl_etl_1 /bin/bash
 ```
+
+Ответ на комментарий
+```
+Добрый вечер, Илья! Да, мой косяк. Я забыл сделать последний push когда делал правки, вот изминения и не залились.  
+```
