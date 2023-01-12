@@ -25,8 +25,8 @@ class LoadElastic:
         ConnectionError,
         max_tries=10,
     )
-    def send_data_to_es(es: Elasticsearch, es_data: list[FilmworkSchemaOut]) -> tuple[int, list]:
-        query = [{'_index': 'movies', '_id': data.id, '_source': data.dict()}
+    def send_data_to_es(es: Elasticsearch, es_data: list[FilmworkSchemaOut], index: str) -> tuple[int, list]:
+        query = [{'_index': index, '_id': data.id, '_source': data.dict()}
                  for data in es_data]
         rows_count, errors = helpers.bulk(es, query)
         if errors:
