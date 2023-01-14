@@ -32,4 +32,5 @@ class LoadElastic:
         if errors:
             logging.error('Error while save data in Elasticsearch',
                           extra={'query': query, 'errors': errors})
+        logging.info(f'Данные в индекса {index} Обновились. Данные: {es_data}.')
         return rows_count, errors

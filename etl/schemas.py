@@ -37,6 +37,6 @@ class PersonSchemaOut(BaseModel):
 
 
 class ElasticSettings(BaseSettings):
-    es_host: str = Field('http://127.0.0.1:9200', env='ES_HOST')
+    es_host: str = Field('http://elasticsearch:9200', env='ES_HOST')
     es_user: str = Field('', env='ES_USER')
     es_password: str = Field('', env='ES_PASSWORD')
