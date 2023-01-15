@@ -25,6 +25,17 @@ class FilmworkSchemaOut(BaseModel):
         return [] if value is None else value
 
 
+class GenreSchemaOut(BaseModel):
+    id: str
+    name: str
+    description: Optional[str]
+
+
+class PersonSchemaOut(BaseModel):
+    id: str
+    full_name: str
+
+
 class ElasticSettings(BaseSettings):
     es_host: str = Field('http://elasticsearch:9200', env='ES_HOST')
     es_user: str = Field('', env='ES_USER')

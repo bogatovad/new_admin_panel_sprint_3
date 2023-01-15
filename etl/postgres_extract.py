@@ -103,3 +103,25 @@ class PostgresExtract:
             ORDER BY fw.modified;
         """)
         return self.extract_data(query, self.curs)
+
+    def get_modified_genres(self, modified: str):
+        query = (
+            "SELECT g.modified, g.id, g.name, g.description FROM content.genre g "
+            f"WHERE modified > '{modified}' ORDER BY g.modified;"
+        )
+        data = self.extract_data(query, self.curs)
+        if not data:
+            return '', []
+        last_modified = data[-1][0]
+        return last_modified, self.extract_data(query, self.curs)
+
+    def get_modified_persons(self, modified: str):
+        query = (
+            "SELECT p.modified, p.id, p.full_name FROM content.person p "
+            f"WHERE modified > '{modified}' ORDER BY p.modified;"
+        )
+        data = self.extract_data(query, self.curs)
+        if not data:
+            return '', []
+        last_modified = data[-1][0]
+        return last_modified, self.extract_data(query, self.curs)
