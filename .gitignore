@@ -1,6 +1,6 @@
 .mypy_cache
-etl/.env
-etl/.env_elastic
+enviroments/.env
+enviroments/.env_elastic
 .idea
 __pycache__
 venv

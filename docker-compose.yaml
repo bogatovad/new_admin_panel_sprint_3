@@ -16,7 +16,7 @@ services:
     expose:
       - 5432
     env_file:
-      - etl/.env
+      - enviroments/.env
 
   elasticsearch:
     image: elasticsearch:8.5.3
@@ -25,7 +25,7 @@ services:
     expose:
       - 9200
     env_file:
-      - etl/.env_elastic
+      - enviroments/.env_elastic
 
 volumes:
   data_postgres:

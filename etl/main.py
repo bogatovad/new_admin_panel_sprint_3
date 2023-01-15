@@ -121,7 +121,7 @@ def create_indexes(elastic_conn):
 def main():
     state = State(JsonFileStorage('state.json'))
     elastic_conn = ElasticSettings().dict()
-    config = dotenv_values('.env')
+    config = dotenv_values('../enviroments/.env')
     create_indexes(elastic_conn)
 
     with sqlite3.connect('db.sqlite') as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:

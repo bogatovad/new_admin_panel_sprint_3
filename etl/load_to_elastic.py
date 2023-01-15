@@ -7,7 +7,7 @@ from elasticsearch import Elasticsearch, helpers
 
 from schemas import FilmworkSchemaOut
 
-config = dotenv_values(".env")
+config = dotenv_values("../enviroments/.env")
 
 
 class LoadElastic:

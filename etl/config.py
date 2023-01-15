@@ -1,7 +1,6 @@
 from dotenv import dotenv_values
 
-config = dotenv_values(".env")
-
+config = dotenv_values("enviroments/.env")
 
 dsl = {
         'dbname': config.get('POSTGRES_DB'),
