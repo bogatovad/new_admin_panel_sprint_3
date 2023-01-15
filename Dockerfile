@@ -1,3 +1,3 @@
 FROM python:3.10
-COPY . .
+COPY etl .
 RUN pip3 install -r requirements.txt
