@@ -1,4 +1,5 @@
 import logging
+import sqlite3
 import time
 
 import backoff
@@ -8,6 +9,7 @@ from dotenv import dotenv_values
 from psycopg2.extras import DictCursor
 
 from config import dsl
+from sqlite_to_postgres import load_from_sqlite
 from indexes import index_to_schema
 from load_to_elastic import LoadElastic
 from postgres_extract import PostgresExtract
@@ -121,6 +123,9 @@ def main():
     elastic_conn = ElasticSettings().dict()
     config = dotenv_values('.env')
     create_indexes(elastic_conn)
+
+    with sqlite3.connect('db.sqlite') as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
+        load_from_sqlite(sqlite_conn, pg_conn)
 
     while True:
         process_etl_movies(elastic_conn, state)
